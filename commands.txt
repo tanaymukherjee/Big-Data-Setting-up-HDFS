@@ -1,0 +1,345 @@
+1.	install ubuntu or any linux (server edition) -------> linux 2.6.x or above
+
+2.	update your packages/softwares -------> sudo apt-get update
+
+3.	Check for SSH in your system ------> type "ssh"
+
+4.	if not already installed, install it now ---------> sudo apt-get insatll opensssh-server
+
+5.	sudo apt-get install openjdk-7-jdk
+
+6.	check whether java is installed or not -----------> java -version
+
+7.	wget http://www.bizdirusa.com/mirrors/apache/hadooop/common/hadoop-1.2.1/hadoop-1.2.1.tar.gz
+
+8.	tar -xzvf hadoop-1.2.1.tar.gz
+
+9.	sudo cp -r hadoop-1.2.1 /usr/local/hadoop
+
+10.	set BASHRC ----------->  sudo vi $HOME/.bashrc
+
+11.	inside bashrc -----> if the hadoop version is below 1.2.1, then replace hadoop prefix with HADOOP_HOMe
+
+12.	
+
+
+
+
+===========================================================================
+
+
+Fully distributed mode:
+
+1 VM----> Pseudo mode (keep)
+2 VM --------> steps:
+			open core-site.xml
+			fs.default.nme=hdfs: // IP of VM1:10001
+			
+			open mapred-site.xml
+			mapred.job.tracker= IP of VM1:10002
+
+
+1 VM -------->
+		steps:
+			1. open masters file (/usr/local/hadoop/conf/masters)
+			   IP address of VM1
+
+			2. open slaves file
+			   IP address of VM1
+			   IP address of VM2
+
+
+step to be done in both VMs
+
+Delet the tmp folder folder -------------->  (sudo rm -r /usr/local/hadoop/tmp)
+Re-create the tmp folder and provide rights to user.
+
+
+
+vm 1:
+ssh-copy-id -i ~/.ssh/id_rsa.pub haddop@IPAddressofVM2
+
+
+
+On vm1 --------------> perform hadoop namenode -format.
+
+
+
+
+============================================================================
+(production)
+
+
+os installlation
+hadoop insatallation
+
+collect the IP address and make a list of it to decide the hadoop services location
+
+ssh-keygen
+authorize the key for itself and all other nodes in the cluster.
+
+
+on tht NN ----->  set core-site.xml, mapred-site.xml (same as the lab) --------->  now, set the masters file (IP address of secondary name node)
+									---------> set the slaves file (IP address of DN)
+
+for all nodes the following settings must be done -----------> set hadoop-env.sh
+
+set bashrc and update.
+
+create a tmp folder (loaction should be same)
+
+
+change te ownereship of the foldef to hadoop user.
+
+on tht NN -----> hadoop namenode -format
+
+
+
+=================================================================================\
+
+
+
+unix commmands:
+
+
+commands for hadoop-
+
+1.	hadoop namenode -format
+
+2.	hadoop fs -ls
+
+3.	hadoop fs -copFromLocal source (local) to Destn (hdfs:/)
+
+4.	hadoop fs -copFromLocal source (hdfs:/) to Destn (local)
+
+5.	hdfs dfs commands
+
+6.	hdfs dfsadmin
+
+Testing for hadoop
+
+
+
+===========================================================================
+
+
+map reduce :
+--------------
+
+
+copyFromLocal ------> pushed to hdfs
+
+TextInputFormat -----------> for getting key value pair
+
+
+
+InputFormat Classes
+
+
+Input Data (programmer) -------> InutFormat Classes (k,v) -------> map process (<key,value> pair) (list (k,v)) -------> 
+
+
+
+
+
+sorting and shuffling happens in the output also.
+
+
+final output is generated through name node
+
+reducer saves teh output in the hdfs.
+
+
+commons-daemon-1.0.1.jar ------> controls hadoop services.
+
+
+
+
+
+network dependancy can be managed if you use the reducer on the map side ----> combiner
+
+combiner does not asks for addition any more to name node as it was doing while using reducer.
+
+combiner works at mp phase which is completely out of name node control and hence bandwidth is managed quite well here
+
+combiner is used for structured data
+
+
+
+
+partioner is 
+
+
+forcing program to run 3 reducers --------------> conf.setNumReduceTasks(3);
+
+===========================================================
+
+
+PIG ----> Two mode ----> Interactive mode and batch mode ---->
+
+
+PIG ----> Two execution mode ----> local mode ----> working on unix file system  ----> MR in UFS (pig 0.8 or above only support local mode)
+				   
+				   mapreduce mode ----> working on hdfs ------> its mandatory to start all hadoop services before invoking pig grunt prompt -----> to 								start pif in MR mode -----> pig or pig -x mapreduce
+
+
+
+
+use pig -x local ------> to start pig
+grunt suports most of the unix command.
+
+PIG ----> Data flow language  --------> Execution -----> Top to bottom approach ---------> Compiling bottom to top approach
+
+the approach is structured but still wrking with un-structured data.
+
+
+LOAD in the pig is used to loads the data in pig storage which technically same as RAM i..cahche and some part into hdfs
+
+
+http://ftp.ncdc.noaa.gov/pub/data/uscrn/products/daily01/
+
+
+DUMP to see data in the prompt itself
+
+ILLUSTRE : used to see the backend working
+
+-----
+
+temp file example:
+
+
+month2 = LOAD 'hdfs:/data/big/201201hourly.txt' USING PigStorage(',') AS (wban:int, date:chararray, time:chararray, stationType:int, skyCondition:chararray, skyConditionFLag:int, visibility:float,visibilityFlag:int, waetherType:chararray, weatherTypeFlag:int, dryTemp:int);
+
+
+describe month1;
+
+
+STORE month2 INTO 'hdfs:/data/big/pigresults' USING PigStorage(':','-schema');
+
+
+cp hdfs:/dat/big/pigresults/.pig_schema hdfs:/dat/big/
+
+
+
+month2 = LOAD 'hdfs:/data/big/201201hourly.txt' USING PigStorage(',');
+
+decsribe month2;
+
+
+
+filtering:
+
+filtered = FILTER month1 by skyCondition == 'CLR';
+dump filtered;
+
+STORE filtered INTO 'hdfs:/data/big/pigfilter01' USING PigStorage(',');
+
+----
+
+Transformation :
+
+transfrom = FOREACH filtered GENERATE date, SUBSTRING(date,0,4) as year, SUBSTRING (date,4,6) as month, SUBSTRING (date,6,8) as day, skyCondition, dryTemp;
+
+STORE transfrom INTO 'hdfs:/data/big/pigtransformjan' USING PigStorage(',');
+
+
+-----
+
+
+dev twitter:
+
+consumer key : aSZDgHlknlf2hRpWFdrLRSkUb
+consumer secret : d7L2FtKAZ8Z2Np1lXgCh9aylCBmPsdwPOEuT4fMrOy7oNIFNUi
+access token : 2231817792-oEosdc3GWgHrwR6WHDD4u5fUbm6b1WL1vV6pvFq
+access secret : mDoukvpz5REWpz5ppDPTRpLPRlkC2RoAJQM5MkZhOeELf
+
+
+
+
+
+
+
+----------------
+
+
+SQOOP:
+
+export ----> hdfs to rdbms
+
+import -----> rdbms to hdfs
+
+
+-------------------------------------
+
+
+
+PIG UDF - user defined functions
+
+
+its all about imlementing your logic which is not in-builtin pig
+to implement  pig udf we need to add an external jar from pig source.
+
+
+data is always is represented as tuple in pig
+
+
+
+
+=================================trib
+
+
+HBASE :
+
+
+challenges for the FB was-
+
+1. Ad Targetting  ------> Google Adwords
+2. Ad Retargetting -----> arget based on pages visited
+3. Graph Search --------> searching for multimedia instances (Apache GiRaph)
+
+sqoop can directly  import teh data to hdfs,mysql, hbase
+
+
+
+
+common problemms faced in structured data :
+
+1. Huge Data
+2. Fast random access
+3. Structured data
+4. variable schema ----> change of column w.r.t. user activity
+5. Need for compression.
+6. Need for distribution (sharding)
+
+sharding is about dividing and distributing the data based on threshold of the data in the datastore.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+hive takes the ownership of the data.
+
+
+
+
+
+
+
+
+
+
+
+
+
