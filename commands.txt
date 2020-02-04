@@ -248,10 +248,10 @@ STORE transfrom INTO 'hdfs:/data/big/pigtransformjan' USING PigStorage(',');
 
 dev twitter:
 
-consumer key : aSZDgHlknlf2hRpWFdrLRSkUb
-consumer secret : d7L2FtKAZ8Z2Np1lXgCh9aylCBmPsdwPOEuT4fMrOy7oNIFNUi
-access token : 2231817792-oEosdc3GWgHrwR6WHDD4u5fUbm6b1WL1vV6pvFq
-access secret : mDoukvpz5REWpz5ppDPTRpLPRlkC2RoAJQM5MkZhOeELf
+consumer key : #######
+consumer secret : #######
+access token : #######-#######
+access secret : #######
 
 
 
